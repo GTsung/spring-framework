@@ -33,10 +33,14 @@ import org.springframework.lang.Nullable;
 public interface ProtocolResolver {
 
 	/**
+	 * 用户自定义协议资源解决策略，允许用户自定义资源加载协议，不需要继承 ResourceLoader 的子类
+	 *
+	 * 使用指定的 ResourceLoader ， 解析指定的 location
+	 * 若成功，则返回对应的 Resource
 	 * Resolve the given location against the given resource loader
 	 * if this implementation's protocol matches.
-	 * @param location the user-specified resource location
-	 * @param resourceLoader the associated resource loader
+	 * @param location the user-specified resource location 资源路径
+	 * @param resourceLoader the associated resource loader 指定的加载器
 	 * @return a corresponding {@code Resource} handle if the given location
 	 * matches this resolver's protocol, or {@code null} otherwise
 	 */

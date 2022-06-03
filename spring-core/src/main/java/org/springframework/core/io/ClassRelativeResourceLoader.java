@@ -34,6 +34,7 @@ public class ClassRelativeResourceLoader extends DefaultResourceLoader {
 
 
 	/**
+	 * 可以根据给定的class 加载其所在包及子包下的资源
 	 * Create a new ClassRelativeResourceLoader for the given class.
 	 * @param clazz the class to load resources through
 	 */

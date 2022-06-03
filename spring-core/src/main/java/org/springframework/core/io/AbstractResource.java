@@ -48,6 +48,7 @@ import org.springframework.util.ResourceUtils;
 public abstract class AbstractResource implements Resource {
 
 	/**
+	 * 判断文件是否存在，若判断过程产生异常，就关闭对应的流
 	 * This implementation checks whether a File can be opened,
 	 * falling back to whether an InputStream can be opened.
 	 * This will cover both directories and content resources.
@@ -57,6 +58,7 @@ public abstract class AbstractResource implements Resource {
 		// Try file existence: can we find the file in the file system?
 		if (isFile()) {
 			try {
+				// 基于file进行判断
 				return getFile().exists();
 			}
 			catch (IOException ex) {
@@ -68,6 +70,7 @@ public abstract class AbstractResource implements Resource {
 		}
 		// Fall back to stream existence: can we open the stream?
 		try {
+			// 基于inputStream进行判断
 			getInputStream().close();
 			return true;
 		}
@@ -81,6 +84,7 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
+	 * 是否可读
 	 * This implementation always returns {@code true} for a resource
 	 * that {@link #exists() exists} (revised as of 5.1).
 	 */
@@ -115,6 +119,7 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
+	 * 基于 getURL 返回的 URL 构建 URI
 	 * This implementation builds a URI based on the URL returned
 	 * by {@link #getURL()}.
 	 */
@@ -139,6 +144,7 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
+	 * 根据 getInputStream 的返回结果构建 ReadableByteChannel
 	 * This implementation returns {@link Channels#newChannel(InputStream)}
 	 * with the result of {@link #getInputStream()}.
 	 * <p>This is the same as in {@link Resource}'s corresponding default method
@@ -150,6 +156,8 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
+	 * 获取资源的长度
+	 * 这个资源内容长度实际是资源的字节长度，通过全部读取一遍来判断
 	 * This method reads the entire InputStream to determine the content length.
 	 * <p>For a custom sub-class of {@code InputStreamResource}, we strongly
 	 * recommend overriding this method with a more optimal implementation, e.g.
@@ -164,6 +172,7 @@ public abstract class AbstractResource implements Resource {
 			long size = 0;
 			byte[] buf = new byte[256];
 			int read;
+			// 通过读取来判断长度
 			while ((read = is.read(buf)) != -1) {
 				size += read;
 			}
@@ -183,6 +192,7 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
+	 * 返回资源最后的修改时间
 	 * This implementation checks the timestamp of the underlying File,
 	 * if available.
 	 * @see #getFileForLastModifiedCheck()

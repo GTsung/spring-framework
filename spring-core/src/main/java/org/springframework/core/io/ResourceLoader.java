@@ -41,11 +41,16 @@ import org.springframework.util.ResourceUtils;
  */
 public interface ResourceLoader {
 
+	// CLASSPATH URL 前缀
 	/** Pseudo URL prefix for loading from the class path: "classpath:". */
 	String CLASSPATH_URL_PREFIX = ResourceUtils.CLASSPATH_URL_PREFIX;
 
 
 	/**
+	 * 根据资源的路径返回resource实例，不确保资源是否真的存在，需要调用exist()方法进行判断
+	 * URL位置资源：file:C:/test.data
+	 * ClassPath位置资源：classpath:test.data
+	 * 相对路径资源，WEB-INF/test.data
 	 * Return a {@code Resource} handle for the specified resource location.
 	 * <p>The handle should always be a reusable resource descriptor,
 	 * allowing for multiple {@link Resource#getInputStream()} calls.
@@ -67,6 +72,7 @@ public interface ResourceLoader {
 	Resource getResource(String location);
 
 	/**
+	 * 返回 ClassLoader 实例
 	 * Expose the {@link ClassLoader} used by this {@code ResourceLoader}.
 	 * <p>Clients which need to access the {@code ClassLoader} directly can do so
 	 * in a uniform manner with the {@code ResourceLoader}, rather than relying
