@@ -75,12 +75,14 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 
 	/** Cache of singleton objects: bean name to bean instance. */
+	// 完整的bean实例
 	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
 	/** Cache of singleton factories: bean name to ObjectFactory. */
 	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
 
 	/** Cache of early singleton objects: bean name to bean instance. */
+	// 属性还未完全注入的单例bean实例
 	private final Map<String, Object> earlySingletonObjects = new ConcurrentHashMap<>(16);
 
 	/** Set of registered singletons, containing the bean names in registration order. */
@@ -179,20 +181,34 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	@Nullable
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
 		// Quick check for existing instance without full singleton lock
+		// 从单例缓存中获取bean(这个bean属性已经完全注入，是个完整的bean)
 		Object singletonObject = this.singletonObjects.get(beanName);
+
+		// 缓存中的bean不存在，且bean正在创建
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
+
+			// 从earlySingletonObjects中获取
+			// 这个bean实例属性还未完全注入
 			singletonObject = this.earlySingletonObjects.get(beanName);
+			// 没有且允许提前创建
 			if (singletonObject == null && allowEarlyReference) {
+				// 加锁
 				synchronized (this.singletonObjects) {
 					// Consistent creation of early reference within full singleton lock
+					// 再去单例缓存中获取，二次判断
 					singletonObject = this.singletonObjects.get(beanName);
 					if (singletonObject == null) {
+						// 继续从earlySingletonObjects中获取
 						singletonObject = this.earlySingletonObjects.get(beanName);
 						if (singletonObject == null) {
+							// 从singletonFactories中获取对应的ObjectFactory
 							ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
+							// singletonFactory不为空则开始创建
 							if (singletonFactory != null) {
 								singletonObject = singletonFactory.getObject();
+								// 放入earlySingletonObjects
 								this.earlySingletonObjects.put(beanName, singletonObject);
+								// 将singletonFactories中的缓存移除
 								this.singletonFactories.remove(beanName);
 							}
 						}
