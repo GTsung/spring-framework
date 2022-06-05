@@ -303,6 +303,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 
 			if (!typeCheckOnly) {
+				// 加入到alreadyCreated缓存中
 				markBeanAsCreated(beanName);
 			}
 
@@ -342,6 +343,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				// Create bean instance.
 				// bean实例化，单例模式
 				if (mbd.isSingleton()) {
+					// 先从一级缓存中获取，如果没有则使用第二个参数createBean
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
 							return createBean(beanName, mbd, args);
