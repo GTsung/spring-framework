@@ -126,7 +126,10 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		// the new (child) delegate with a reference to the parent for fallback purposes,
 		// then ultimately reset this.delegate back to its original (parent) reference.
 		// this behavior emulates a stack of delegates without actually necessitating one.
+
+		// 记录老的BeanDefinitionParserDelegate对象
 		BeanDefinitionParserDelegate parent = this.delegate;
+		// 创建BeanDefinitionParserDelegate，并进行设置
 		this.delegate = createDelegate(getReaderContext(), root, parent);
 
 		// 处理profile，主要用于切换环境
@@ -161,6 +164,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			XmlReaderContext readerContext, Element root, @Nullable BeanDefinitionParserDelegate parentDelegate) {
 
 		BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(readerContext);
+		// 解析标签，初始化默认设置
 		delegate.initDefaults(root, parentDelegate);
 		return delegate;
 	}
