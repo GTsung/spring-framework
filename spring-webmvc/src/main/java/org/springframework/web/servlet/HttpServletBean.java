@@ -79,6 +79,7 @@ import org.springframework.web.context.support.StandardServletEnvironment;
  * @see #doGet
  * @see #doPost
  */
+// 负责将ServletConfig设置到当前servlet对象中
 @SuppressWarnings("serial")
 public abstract class HttpServletBean extends HttpServlet implements EnvironmentCapable, EnvironmentAware {
 
@@ -148,14 +149,19 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	@Override
 	public final void init() throws ServletException {
 
+		// 负责将ServletConfig设置到当前servlet对象中
 		// Set bean properties from init parameters.
+		// 解析<init-param/>标签，封装到ServletConfigPropertyValues
 		PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
 		if (!pvs.isEmpty()) {
 			try {
+				// 将当前Servlet对象转换成BeanWrapper，能以spring的方式将pvs注入到该BeanWrapper中
 				BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 				ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
+				// 注册自定义属性编辑器
 				bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, getEnvironment()));
 				initBeanWrapper(bw);
+				// 设置属性到beanWrapper
 				bw.setPropertyValues(pvs, true);
 			}
 			catch (BeansException ex) {
@@ -167,6 +173,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 		}
 
 		// Let subclasses do whatever initialization they like.
+		// 由子类FrameworkServlet实现
 		initServletBean();
 	}
 
