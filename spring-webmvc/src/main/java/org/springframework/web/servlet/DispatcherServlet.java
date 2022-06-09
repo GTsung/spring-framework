@@ -935,6 +935,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Keep a snapshot of the request attributes in case of an include,
 		// to be able to restore the original attributes after the include.
+		// 保存当前请求中相关属性的一个快照
 		Map<String, Object> attributesSnapshot = null;
 		if (WebUtils.isIncludeRequest(request)) {
 			attributesSnapshot = new HashMap<>();
@@ -948,6 +949,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 
 		// Make framework objects available to handlers and view objects.
+		// 设置spring框架中的常用对象到request属性中
 		request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
 		request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
 		request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
@@ -969,9 +971,11 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 
 		try {
+			// 执行请求的分发
 			doDispatch(request, response);
 		}
 		finally {
+			// 异步处理
 			if (!WebAsyncUtils.getAsyncManager(request).isConcurrentHandlingStarted()) {
 				// Restore the original attribute snapshot, in case of an include.
 				if (attributesSnapshot != null) {
@@ -1038,6 +1042,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		HandlerExecutionChain mappedHandler = null;
 		boolean multipartRequestParsed = false;
 
+		// 获取异步管理器
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 
 		try {
@@ -1045,10 +1050,12 @@ public class DispatcherServlet extends FrameworkServlet {
 			Exception dispatchException = null;
 
 			try {
+				// 检测请求是否为上传请求，如果是则通过multipartResolver 将其封装成 MultipartHttpServletRequest 对象
 				processedRequest = checkMultipart(request);
 				multipartRequestParsed = (processedRequest != request);
 
 				// Determine handler for the current request.
+				// 获得请求对应的 HandlerExecutionChain 对象（HandlerMethod 和 HandlerInterceptor 拦截器们）
 				mappedHandler = getHandler(processedRequest);
 				if (mappedHandler == null) {
 					noHandlerFound(processedRequest, response);
@@ -1056,9 +1063,11 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 
 				// Determine handler adapter for the current request.
+				// 获取适配器
 				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 
 				// Process last-modified header, if supported by the handler.
+				// 处理有Last-Modified请求头的场景
 				String method = request.getMethod();
 				boolean isGet = HttpMethod.GET.matches(method);
 				if (isGet || HttpMethod.HEAD.matches(method)) {
@@ -1068,18 +1077,24 @@ public class DispatcherServlet extends FrameworkServlet {
 					}
 				}
 
+				// 前置处理 拦截器
+				// 该方法如果有一个拦截器的前置处理返回false，则开始倒序触发所有的拦截器的 已完成处理
 				if (!mappedHandler.applyPreHandle(processedRequest, response)) {
 					return;
 				}
 
 				// Actually invoke the handler.
+				// 真正的调用 handler 方法，也就是执行对应的方法，并返回视图
 				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
+				// 如果是异步
 				if (asyncManager.isConcurrentHandlingStarted()) {
 					return;
 				}
 
+				// 无视图的情况下设置默认视图名称
 				applyDefaultViewName(processedRequest, mv);
+				// 后置处理 拦截器
 				mappedHandler.applyPostHandle(processedRequest, response, mv);
 			}
 			catch (Exception ex) {
@@ -1090,6 +1105,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				// making them available for @ExceptionHandler methods and other scenarios.
 				dispatchException = new NestedServletException("Handler dispatch failed", err);
 			}
+			// 处理正常和异常的请求调用结果
 			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 		}
 		catch (Exception ex) {
@@ -1267,6 +1283,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
 		if (this.handlerMappings != null) {
 			for (HandlerMapping mapping : this.handlerMappings) {
+				// 获得执行链，包含handler及拦截器
 				HandlerExecutionChain handler = mapping.getHandler(request);
 				if (handler != null) {
 					return handler;

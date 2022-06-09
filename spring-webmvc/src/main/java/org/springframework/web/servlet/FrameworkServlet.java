@@ -885,11 +885,14 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	protected void service(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
+		// 获得请求方法
 		HttpMethod httpMethod = HttpMethod.resolve(request.getMethod());
+		// 处理 PATCH 请求
 		if (httpMethod == HttpMethod.PATCH || httpMethod == null) {
 			processRequest(request, response);
 		}
 		else {
+			// 处理其他类型请求
 			super.service(request, response);
 		}
 	}
@@ -951,8 +954,11 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	protected void doOptions(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
+		// 默认为true
 		if (this.dispatchOptionsRequest || CorsUtils.isPreFlightRequest(request)) {
+			// 处理请求
 			processRequest(request, response);
+			// 响应header包含allow，则不需要交给父方法处理
 			if (response.containsHeader("Allow")) {
 				// Proper OPTIONS response coming from a handler - we're done.
 				return;
@@ -980,7 +986,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	protected void doTrace(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
+		// dispatchTraceRequest默认false
 		if (this.dispatchTraceRequest) {
+			// 处理
 			processRequest(request, response);
 			if ("message/http".equals(response.getContentType())) {
 				// Proper TRACE response coming from a handler - we're done.
@@ -1013,6 +1021,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		initContextHolders(request, localeContext, requestAttributes);
 
 		try {
+			// 执行真正的逻辑
 			doService(request, response);
 		}
 		catch (ServletException | IOException ex) {
@@ -1030,6 +1039,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 				requestAttributes.requestCompleted();
 			}
 			logResult(request, response, failureCause, asyncManager);
+			// 发布 ServletRequestHandledEvent 请求处理完成事件
 			publishRequestHandledEvent(request, response, startTime, failureCause);
 		}
 	}
