@@ -84,7 +84,9 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 			throws MultipartException {
 
 		super(request);
+		// 如果不需要延迟解析
 		if (!lazyParsing) {
+			// 解析请求
 			parseRequest(request);
 		}
 	}
@@ -92,23 +94,30 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 
 	private void parseRequest(HttpServletRequest request) {
 		try {
+			// 获取part
 			Collection<Part> parts = request.getParts();
 			this.multipartParameterNames = new LinkedHashSet<>(parts.size());
 			MultiValueMap<String, MultipartFile> files = new LinkedMultiValueMap<>(parts.size());
+			// 遍历part
 			for (Part part : parts) {
 				String headerValue = part.getHeader(HttpHeaders.CONTENT_DISPOSITION);
+				// 解析生成ContentDisposition 对象
 				ContentDisposition disposition = ContentDisposition.parse(headerValue);
+				// 获得文件名
 				String filename = disposition.getFilename();
 				if (filename != null) {
+					// 文件名非空，是文件参数，创建StandardMultipartFile对象
 					if (filename.startsWith("=?") && filename.endsWith("?=")) {
 						filename = MimeDelegate.decode(filename);
 					}
 					files.add(part.getName(), new StandardMultipartFile(part, filename));
 				}
 				else {
+					// 文件名为空，则是普通参数
 					this.multipartParameterNames.add(part.getName());
 				}
 			}
+			// 设置到父类的MultipartFiles
 			setMultipartFiles(files);
 		}
 		catch (Throwable ex) {
@@ -129,6 +138,9 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 		parseRequest(getRequest());
 	}
 
+	/**
+	 * 获取请求中的参数名称
+	 */
 	@Override
 	public Enumeration<String> getParameterNames() {
 		if (this.multipartParameterNames == null) {
