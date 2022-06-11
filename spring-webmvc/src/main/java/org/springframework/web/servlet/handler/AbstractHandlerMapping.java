@@ -505,6 +505,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		// Bean name or resolved handler?
 		if (handler instanceof String) {
 			String handlerName = (String) handler;
+			// 从容器中获取bean，即handler
 			handler = obtainApplicationContext().getBean(handlerName);
 		}
 
@@ -513,6 +514,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			initLookupPath(request);
 		}
 
+		// 获取执行链，包括拦截器
 		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
 
 		if (logger.isTraceEnabled()) {
@@ -522,6 +524,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			logger.debug("Mapped to " + executionChain.getHandler());
 		}
 
+		// 跨域
 		if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
 			CorsConfiguration config = getCorsConfiguration(handler, request);
 			if (getCorsConfigurationSource() != null) {
