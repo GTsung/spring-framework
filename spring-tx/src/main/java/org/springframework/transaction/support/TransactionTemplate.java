@@ -130,13 +130,16 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 	public <T> T execute(TransactionCallback<T> action) throws TransactionException {
 		Assert.state(this.transactionManager != null, "No PlatformTransactionManager set");
 
+		// 内部封装好的事务管理器
 		if (this.transactionManager instanceof CallbackPreferringPlatformTransactionManager) {
 			return ((CallbackPreferringPlatformTransactionManager) this.transactionManager).execute(this, action);
 		}
 		else {
+			// 需要手动获取事务，执行方法，提交事务
 			TransactionStatus status = this.transactionManager.getTransaction(this);
 			T result;
 			try {
+				// 执行业务逻辑
 				result = action.doInTransaction(status);
 			}
 			catch (RuntimeException | Error ex) {
